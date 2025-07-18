@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",              // or your desired version
+    "module": "commonjs",
+    "outDir": "./dist",              // Output folder for compiled JS
+    "rootDir": "./src",              // Root folder for your TS source files
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]            // Ensure TS knows what files to compile
+}
