@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: budget
+      POSTGRES_DB: biltong
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +20,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/budget?schema=public
+      DATABASE_URL: postgresql://postgres:password@db:5432/biltong?schema=public
     command: npm run start
 
 volumes:

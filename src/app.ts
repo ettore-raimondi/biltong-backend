@@ -8,7 +8,12 @@ import jwt from "./plugins/jwt";
 export const buildApp = async () => {
   const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
   app.register(cors, {
-    origin: true, // or specific origin: 'http://localhost:3000'
+    origin: "http://localhost:8080", // or 3000 depending on your React dev server
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // allow all you use
+    allowedHeaders: ["Content-Type", "Authorization"], // add custom headers if you send any
+    credentials: true, // only if you need cookies/auth
+    preflightContinue: false, // let plugin handle OPTIONS
+    optionsSuccessStatus: 204, // Chrome likes 204 better than 200
   });
   await app.register(jwt);
   await app.register(prisma);
@@ -17,8 +22,8 @@ export const buildApp = async () => {
   await app.register(require("@fastify/swagger"), {
     swagger: {
       info: {
-        title: "Budget Planner API",
-        description: "API documentation for the budget planner",
+        title: "Biltong drying API",
+        description: "API documentation for the biltong drying app",
         version: "1.0.0",
       },
       host: "localhost:3000", // change this if needed
