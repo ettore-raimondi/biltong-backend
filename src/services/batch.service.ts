@@ -1,8 +1,5 @@
-import { FastifyRequest } from "fastify";
 import { Batch, BatchInput } from "../schemas/batch.schema";
-import { FastifyZodInstance, FastifyZodRequest } from "../types/helper";
-import { getJWT } from "./auth.service";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 export async function createBatch({
   batch,
@@ -11,7 +8,7 @@ export async function createBatch({
 }: {
   batch: BatchInput;
   userId: number;
-  prisma: FastifyZodInstance["prisma"];
+  prisma: PrismaClient;
 }): Promise<Batch> {
   const { meat_pieces, ...batchData } = batch;
   try {

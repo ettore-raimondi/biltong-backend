@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import {
   FastifyBaseLogger,
   FastifyInstance,
@@ -36,7 +37,9 @@ export type FastifyZodInstance<
   FastifySchema,
   FastifyTypeProviderDefault,
   IncomingMessage
->;
+> & {
+  prisma: PrismaClient;
+};
 
 export type FastifyZodRequest<
   RouteGeneric extends RouteGenericInterface = RouteGenericInterface,
@@ -52,17 +55,22 @@ export type FastifyZodRequest<
     RouteGeneric
   >,
   HttpRequest = IncomingMessage // Add this parameter
-> = FastifyRequest<
-  RouteGeneric,
-  RawServer,
-  RawRequest,
-  SchemaCompiler,
-  ZodTypeProvider, // Force ZodTypeProvider
-  ContextConfig,
-  Logger,
-  RequestType,
-  HttpRequest
->;
+> = Omit<
+  FastifyRequest<
+    RouteGeneric,
+    RawServer,
+    RawRequest,
+    SchemaCompiler,
+    ZodTypeProvider, // Force ZodTypeProvider
+    ContextConfig,
+    Logger,
+    RequestType,
+    HttpRequest
+  >,
+  "server"
+> & {
+  server: FastifyZodInstance;
+};
 
 export type FastifyZodReply<
   RouteGeneric extends RouteGenericInterface = RouteGenericInterface,

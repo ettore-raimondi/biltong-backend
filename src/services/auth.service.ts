@@ -1,7 +1,10 @@
 import bcrypt from "bcrypt";
 import { InvalidPasswordError, UserNotFoundError } from "../errors";
-import { FastifyZodInstance, FastifyZodRequest } from "../types/helper";
+import { FastifyZodRequest } from "../types/helper";
 import { jwtToken, JwtToken } from "../schemas/user.schema";
+import { LoginInput } from "../schemas/auth.schema";
+import { PrismaClient } from "@prisma/client";
+import { JWT } from "@fastify/jwt";
 
 export async function getJWT(req: FastifyZodRequest): Promise<JwtToken> {
   const authHeader = req.headers.authorization;
@@ -18,17 +21,17 @@ export async function getJWT(req: FastifyZodRequest): Promise<JwtToken> {
   return jwtToken.parse(decodedToken); // Validate the structure
 }
 
-export async function login(
-  {
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  },
-  app: FastifyZodInstance
-) {
-  const user = await app.prisma.users.findUnique({ where: { email } });
+export async function login({
+  loginInput,
+  prisma,
+  jwt,
+}: {
+  loginInput: LoginInput;
+  prisma: PrismaClient;
+  jwt: JWT;
+}) {
+  const { email, password } = loginInput;
+  const user = await prisma.users.findUnique({ where: { email } });
   if (!user) {
     throw new UserNotFoundError("User not found");
   }
@@ -38,7 +41,7 @@ export async function login(
   }
 
   // Generate JWT token
-  const token = app.jwt.sign(
+  const token = jwt.sign(
     {
       id: user.id,
       name: user.name,
