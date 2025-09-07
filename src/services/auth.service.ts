@@ -1,6 +1,22 @@
 import bcrypt from "bcrypt";
 import { InvalidPasswordError, UserNotFoundError } from "../errors";
-import { FastifyZodInstance } from "../types/helper";
+import { FastifyZodInstance, FastifyZodRequest } from "../types/helper";
+import { jwtToken, JwtToken } from "../schemas/user.schema";
+
+export async function getJWT(req: FastifyZodRequest): Promise<JwtToken> {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    throw new Error("Authorization token is missing");
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    throw new Error("Invalid authorization header");
+  }
+
+  const decodedToken = await req.jwtVerify();
+  return jwtToken.parse(decodedToken); // Validate the structure
+}
 
 export async function login(
   {
@@ -12,7 +28,7 @@ export async function login(
   },
   app: FastifyZodInstance
 ) {
-  const user = await app.prisma.user.findUnique({ where: { email } });
+  const user = await app.prisma.users.findUnique({ where: { email } });
   if (!user) {
     throw new UserNotFoundError("User not found");
   }

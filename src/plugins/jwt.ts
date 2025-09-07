@@ -13,7 +13,11 @@ export default fp(async (fastify) => {
       try {
         await req.jwtVerify();
       } catch (err) {
-        res.send(err);
+        res.status(401).send({
+          statusCode: 401,
+          error: "Unauthorized",
+          message: err instanceof Error ? err.message : "Authentication failed",
+        });
       }
     }
   );

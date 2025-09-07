@@ -13,10 +13,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model users {
   id    Int     @id @default(autoincrement())
   email String  @unique
   name  String
   surname String
   password String
+  batches  biltong_batches[]
+}
+
+model biltong_batches {
+  id            Int       @id @default(autoincrement())
+  created_at    DateTime  @default(now()) 
+  deleted_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  name          String    @unique
+  marinade_time String?   
+  seasoning     String?
+  temperature   Float
+  air_flow      Int
+  humidity      Float
+  weight_loss   Float
+  user_id       Int
+  
+  // Relations
+  meat_pieces   meat_pieces[]
+  user          users     @relation(fields: [user_id], references: [id])
+}
+
+model meat_pieces {
+  id             Int           @id @default(autoincrement())
+  piece_number   Int
+  initial_weight Float
+  batch_id       Int
+
+  // Relation: each meat piece belongs to one batch
+  batch biltong_batches @relation(fields: [batch_id], references: [id])
 }

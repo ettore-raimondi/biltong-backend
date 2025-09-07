@@ -21,3 +21,14 @@ export const jwtPayloadSchema = z.object({
   iat: z.number(),
   exp: z.number(),
 });
+
+export type User = z.infer<typeof userSchema>;
+
+export const jwtToken = z.object({
+  id: z.number(),
+  name: z.string().min(1).max(50),
+  surname: z.string().min(1).max(50),
+  email: z.string().email(),
+});
+
+export type JwtToken = z.infer<typeof jwtToken>;

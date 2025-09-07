@@ -6,7 +6,9 @@
     "rootDir": "./src",              // Root folder for your TS source files
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "inlineSources": true
   },
   "include": ["src"], // Include all TypeScript files in the src folder
   "exclude": ["node_modules", "dist"] // Exclude node_modules and dist folders

@@ -1,37 +1,25 @@
 import { login } from "../services/auth.service";
 import { createUser } from "../services/user.service";
-import { loginSchemaInput, userSchema } from "../schemas/user.schema";
+import { loginSchemaInput, User, userSchema } from "../schemas/user.schema";
 import { FastifyZodReply, FastifyZodRequest } from "../types/helper";
+import { LoginInput } from "../schemas/auth.schema";
 
 export async function handleLogin(
-  req: FastifyZodRequest,
+  req: FastifyZodRequest<{ Body: LoginInput }>,
   res: FastifyZodReply
 ) {
-  const validatedInput = loginSchemaInput.safeParse(req.body);
-  if (!validatedInput.success) {
-    res.status(400).send({
-      errors: validatedInput.error.issues.map((issue) => issue.message),
-    });
-    return;
-  }
-  const result = await login(validatedInput.data, req.server);
+  const loginInput = req.body;
+  const result = await login(loginInput, req.server);
   res.send(result);
 }
 
 export async function handleRegister(
-  req: FastifyZodRequest,
+  req: FastifyZodRequest<{ Body: User }>,
   res: FastifyZodReply
 ) {
-  const validatedInput = userSchema.safeParse(req.body);
-  if (!validatedInput.success) {
-    res.status(400).send({
-      errors: validatedInput.error.issues.map((issue) => issue.message),
-    });
-    return;
-  }
-
   try {
-    const user = await createUser(validatedInput.data, req.server);
+    const userInput = req.body;
+    const user = await createUser(userInput, req.server);
     res.send({ user });
   } catch (error: unknown) {
     res.status(400).send({
