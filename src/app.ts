@@ -41,7 +41,6 @@ export const buildApp = async () => {
   app.addHook("onSend", async (request: any, reply: any, payload: string) => {
     if (payload) {
       try {
-        console.log("PAYLOAD!!!", payload);
         // Payload is a JSON string at this point!!! parse it first
         const parsed = JSON.parse(payload);
         // Transform to camelCase

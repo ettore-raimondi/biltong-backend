@@ -48,3 +48,27 @@ export async function fetchBatches({
   });
   return batches;
 }
+
+export async function deactivateActiveBatch({
+  userId,
+  prisma,
+}: {
+  userId: number;
+  prisma: PrismaClient;
+}): Promise<void> {
+  // Find the currently active batch (the one without a deleted_at timestamp)
+  const activeBatch = await prisma.biltong_batches.findFirst({
+    where: {
+      user_id: userId,
+      deleted_at: null,
+    },
+  });
+
+  if (activeBatch) {
+    // Deactivate the active batch by setting the deleted_at timestamp
+    await prisma.biltong_batches.update({
+      where: { id: activeBatch.id },
+      data: { deleted_at: new Date() },
+    });
+  }
+}

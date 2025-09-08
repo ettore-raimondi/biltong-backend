@@ -17,7 +17,7 @@ export const batchSchema = z.object({
   name: z.string().min(2).max(100),
   created_at: z.coerce.date().default(() => new Date()),
   updated_at: z.coerce.date().default(() => new Date()),
-  deleted_at: z.coerce.date().optional(),
+  deleted_at: z.coerce.date().optional().nullable(),
   marinade_time: z.string().optional().nullable(),
   seasoning: z.string().max(200).optional().nullable(),
   temperature: z.number().min(0),

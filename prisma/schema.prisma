@@ -25,7 +25,7 @@ model users {
 model biltong_batches {
   id            Int       @id @default(autoincrement())
   created_at    DateTime  @default(now()) 
-  deleted_at    DateTime  @default(now())
+  deleted_at    DateTime?  
   updated_at    DateTime  @updatedAt
   name          String    @unique
   marinade_time String?   

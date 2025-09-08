@@ -1,10 +1,9 @@
-import { FastifyRequest } from "fastify";
+import { BatchInput } from "../schemas/batch.schema";
 import {
-  BatchInput,
-  batchSchema,
-  batchSchemaInput,
-} from "../schemas/batch.schema";
-import { createBatch, fetchBatches } from "../services/batch.service";
+  createBatch,
+  deactivateActiveBatch,
+  fetchBatches,
+} from "../services/batch.service";
 import { FastifyZodReply, FastifyZodRequest } from "../types/helper";
 import { getJWT } from "../services/auth.service";
 
@@ -13,11 +12,19 @@ export async function handleCreateBatch(
   res: FastifyZodReply
 ) {
   const batchData = req.body;
+  // First deactivate the active batch if any
+  await deactivateActiveBatch({
+    prisma: req.server.prisma,
+    userId: (await getJWT(req)).id,
+  });
+
+  // Now create the new batch
   const createdBatch = await createBatch({
     batch: batchData,
     userId: (await getJWT(req)).id,
     prisma: req.server.prisma,
   });
+
   res.status(201).send(createdBatch);
 }
 
