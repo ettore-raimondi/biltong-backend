@@ -4,9 +4,11 @@ import {
   deactivateActiveBatch,
   deleteBatch,
   fetchBatches,
+  getActiveBatch,
 } from "../services/batch.service";
 import { FastifyZodReply, FastifyZodRequest } from "../types/helper";
 import { getJWT } from "../services/auth.service";
+import { startSeedingSensorDataCronJob } from "../services/sensor-data.service";
 
 export async function handleDeactivateBatch(
   req: FastifyZodRequest<{ Body: DeactivateBatchInput }>,
@@ -41,17 +43,23 @@ export async function handleCreateBatch(
   res: FastifyZodReply
 ) {
   const batchData = req.body;
-  // First deactivate the active batch if any
-  await deactivateActiveBatch({
+  const userId = (await getJWT(req)).id;
+  const userHasActiveBatch = await getActiveBatch({
     prisma: req.server.prisma,
-    userId: (await getJWT(req)).id,
+    userId,
   });
+
+  if (userHasActiveBatch) {
+    return res
+      .status(400)
+      .send({ message: "User already has an active batch" });
+  }
 
   // Now create the new batch
   const createdBatch = await createBatch({
     batch: batchData,
-    userId: (await getJWT(req)).id,
     prisma: req.server.prisma,
+    userId,
   });
 
   res.status(201).send(createdBatch);

@@ -20,7 +20,9 @@ export async function createBatch({
           connect: { id: userId },
         },
         meat_pieces: {
-          create: meat_pieces.map((piece) => piece),
+          create: meat_pieces
+            .filter((piece) => piece.initial_weight > 0)
+            .map((piece) => piece),
         },
       },
       include: {
@@ -29,7 +31,7 @@ export async function createBatch({
     });
 
     if (result) {
-      startSeedingSensorDataCronJob({ prisma });
+      startSeedingSensorDataCronJob({ prisma, intervalValueInSeconds: 5 }); // TODO: adjust later
     }
 
     return result;
@@ -69,6 +71,26 @@ export async function deleteBatch({
   });
 }
 
+export async function getActiveBatch({
+  userId,
+  prisma,
+}: {
+  userId: number;
+  prisma: PrismaClient;
+}): Promise<Batch | null> {
+  const activeBatch = await prisma.biltong_batches.findFirst({
+    where: {
+      user_id: userId,
+      deleted_at: null,
+    },
+    include: {
+      meat_pieces: true,
+    },
+  });
+
+  return activeBatch;
+}
+
 export async function deactivateActiveBatch({
   userId,
   prisma,
@@ -77,12 +99,7 @@ export async function deactivateActiveBatch({
   prisma: PrismaClient;
 }): Promise<void> {
   // Find the currently active batch (the one without a deleted_at timestamp)
-  const activeBatch = await prisma.biltong_batches.findFirst({
-    where: {
-      user_id: userId,
-      deleted_at: null,
-    },
-  });
+  const activeBatch = await getActiveBatch({ userId, prisma });
 
   if (!activeBatch) {
     console.log("No active batch found to deactivate.");

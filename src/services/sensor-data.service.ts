@@ -31,11 +31,29 @@ async function seedSensorDataForActiveBatches({
         airFlow: Math.random().toFixed(4), // Random airflow between 0-1
       };
 
+      const latestBatch = await prisma.batch_data.findFirst({
+        where: {
+          batch_id: batch.id,
+        },
+        include: {
+          weight_measurements: true, // Each batch can only have a maximum of 9 weight measurements
+        },
+        orderBy: {
+          time_stamp: "desc",
+        },
+      });
+
       // Get current weights for meat pieces (simulate weight loss)
-      const meatWeights = batch.meat_pieces.map((piece) => ({
-        pieceId: piece.id,
-        weight: piece.initial_weight * (0.97 + Math.random() * 0.02), // Simulate 1-3% weight loss
-      }));
+      const meatWeights = batch.meat_pieces.map((piece) => {
+        const weight =
+          latestBatch?.weight_measurements.find(
+            (wm) => wm.meat_piece_id === piece.id
+          )?.weight ?? piece.initial_weight;
+        return {
+          pieceId: piece.id,
+          weight: weight * (0.97 + Math.random() * 0.02), // Simulate 1-3% weight loss
+        };
+      });
 
       // Create batch_data entry with the weight measurements
       await prisma.batch_data.create({
