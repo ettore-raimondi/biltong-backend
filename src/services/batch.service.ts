@@ -1,5 +1,6 @@
 import { Batch, BatchInput } from "../schemas/batch.schema";
 import { PrismaClient } from "@prisma/client";
+import { startSeedingSensorDataCronJob } from "./sensor-data.service";
 
 export async function createBatch({
   batch,
@@ -26,6 +27,11 @@ export async function createBatch({
         meat_pieces: true,
       },
     });
+
+    if (result) {
+      startSeedingSensorDataCronJob({ prisma });
+    }
+
     return result;
   } catch (error) {
     console.error("Error creating batch:", error);
@@ -49,6 +55,20 @@ export async function fetchBatches({
   return batches;
 }
 
+export async function deleteBatch({
+  prisma,
+  batchId,
+}: {
+  prisma: PrismaClient;
+  batchId: number;
+}): Promise<void> {
+  await prisma.biltong_batches.delete({
+    where: {
+      id: batchId,
+    },
+  });
+}
+
 export async function deactivateActiveBatch({
   userId,
   prisma,
@@ -64,11 +84,14 @@ export async function deactivateActiveBatch({
     },
   });
 
-  if (activeBatch) {
-    // Deactivate the active batch by setting the deleted_at timestamp
-    await prisma.biltong_batches.update({
-      where: { id: activeBatch.id },
-      data: { deleted_at: new Date() },
-    });
+  if (!activeBatch) {
+    console.log("No active batch found to deactivate.");
+    return;
   }
+
+  // Deactivate the active batch by setting the deleted_at timestamp
+  await prisma.biltong_batches.update({
+    where: { id: activeBatch.id },
+    data: { deleted_at: new Date() },
+  });
 }

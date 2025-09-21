@@ -14,39 +14,65 @@ datasource db {
 }
 
 model users {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String
-  surname String
+  id       Int               @id @default(autoincrement())
+  email    String            @unique
+  name     String
+  surname  String
   password String
   batches  biltong_batches[]
 }
 
 model biltong_batches {
   id            Int       @id @default(autoincrement())
-  created_at    DateTime  @default(now()) 
-  deleted_at    DateTime?  
+  created_at    DateTime  @default(now())
+  deleted_at    DateTime?
   updated_at    DateTime  @updatedAt
   name          String    @unique
-  marinade_time String?   
+  marinade_time String?
   seasoning     String?
   temperature   Float
   air_flow      Int
   humidity      Float
   weight_loss   Float
   user_id       Int
-  
+
   // Relations
-  meat_pieces   meat_pieces[]
-  user          users     @relation(fields: [user_id], references: [id])
+  meat_pieces meat_pieces[]
+  user        users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  batch_data  batch_data[]
 }
 
 model meat_pieces {
-  id             Int           @id @default(autoincrement())
+  id             Int   @id @default(autoincrement())
   piece_number   Int
   initial_weight Float
   batch_id       Int
 
   // Relation: each meat piece belongs to one batch
-  batch biltong_batches @relation(fields: [batch_id], references: [id])
+  batch               biltong_batches       @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  weight_measurements weight_measurements[]
+}
+
+model weight_measurements {
+  id            Int   @id @default(autoincrement())
+  weight        Float
+  batch_data_id Int
+  meat_piece_id Int
+
+  // Relations
+  batch_data batch_data  @relation(fields: [batch_data_id], references: [id], onDelete: Cascade)
+  meat_piece meat_pieces @relation(fields: [meat_piece_id], references: [id], onDelete: Cascade)
+}
+
+model batch_data {
+  id          Int      @id @default(autoincrement())
+  batch_id    Int
+  time_stamp  DateTime @default(now())
+  temperature Float
+  air_flow    Int
+  humidity    Float
+
+  // Relation
+  batch               biltong_batches       @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  weight_measurements weight_measurements[]
 }

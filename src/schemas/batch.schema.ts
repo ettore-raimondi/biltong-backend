@@ -27,6 +27,11 @@ export const batchSchema = z.object({
   meat_pieces: z.array(meatPieceSchema),
 });
 
+export const deactivateBatchInputSchema = z.object({
+  id: z.number(),
+});
+export type DeactivateBatchInput = z.infer<typeof deactivateBatchInputSchema>;
+
 export const batchSchemaInput = batchSchema
   .omit({ id: true, created_at: true, updated_at: true, deleted_at: true })
   .extend({
